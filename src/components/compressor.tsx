@@ -40,39 +40,18 @@ export const CompressionSidebar = ({ onCompress }: any) => {
         setImageSettings(prev => ({ ...prev, [key]: value }));
     };
 
-    if (collapsed) {
-        return (
-            <div className="flex flex-col items-center p-2 border-l border-neutral-300 h-full">
-                <Button variant="ghost" size="icon" onClick={() => setCollapsed(false)}>
-                    <ChevronLeft />
-                </Button>
-                <Separator className="my-2" />
-                <Button variant="ghost" size="icon">
-                    <Settings />
-                </Button>
-            </div>
-        );
-    }
-
     return (
         <div className="w-80 border-l border-neutral-300 h-full flex flex-col">
-            <div className="flex justify-between items-center gap-2 p-4 border-b border-b-neutral-200">
-                <h3 className="font-semibold">Compression Settings</h3>
-                <Button variant="ghost" size="icon" onClick={() => setCollapsed(true)}>
-                    <ChevronRight />
-                </Button>
-            </div>
-
-            <Tabs defaultValue="video" className="flex-1">
-                <TabsList className="grid grid-cols-4 mx-4 mt-2">
+            <Tabs defaultValue="video" className="flex-1 justify-center items-center w-full px-2 ">
+                <TabsList className="grid grid-cols-4 mx-4 mt-2 w-full">
                     <TabsTrigger value="video" >Video</TabsTrigger>
                     <TabsTrigger value="image">Image</TabsTrigger>
                     <TabsTrigger value="gif">GIF</TabsTrigger>
                     <TabsTrigger value="pdf">PDF</TabsTrigger>
                 </TabsList>
 
-                <ScrollArea className="flex-1">
-                    <TabsContent value="video" className="p-4 pt-2">
+                <ScrollArea className="flex-1 w-full">
+                    <TabsContent value="video" className="p-1">
                         <Card className='border-none bg-neutral-150'>
                             <CardContent className="space-y-4">
                                 {/* <div className=" flex justify-between items-center gap-2">
@@ -229,9 +208,9 @@ export const CompressionSidebar = ({ onCompress }: any) => {
                             </CardContent>
                         </Card>
                     </TabsContent>
-                    <TabsContent value="image" className="p-4 pt-2">
-                        <Card className='border-none bg-neutral-150'>
-                            <CardContent className="space-y-4 pt-4">
+                    <TabsContent value="image" className="p-1">
+                        <Card className='border-none bg-neutral-150 p-2'>
+                            <CardContent className="">
                                 <div className=" flex justify-between items-center gap-2">
                                     <Label htmlFor="format">Format</Label>
                                     <Select
@@ -329,10 +308,10 @@ export const CompressionSidebar = ({ onCompress }: any) => {
                             </CardContent>
                         </Card>
                     </TabsContent>
-                    <TabsContent value="gif" className="p-4 pt-2">
+                    <TabsContent value="gif" className="p-1">
                         <div className="p-2 text-center">coming soon</div>
                     </TabsContent>
-                    <TabsContent value="pdf" className="p-4 pt-2">
+                    <TabsContent value="pdf" className="p-1">
                         <div className="p-2 text-center">coming soon</div>
                     </TabsContent>
                 </ScrollArea>

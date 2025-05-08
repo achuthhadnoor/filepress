@@ -26,7 +26,6 @@ class MainWindow implements MainWindowManager {
       fullscreenable: false,
       visualEffectState: "active",
       vibrancy: "sidebar",
-      alwaysOnTop: true,
       backgroundMaterial: "mica",
       titleBarStyle: "hiddenInset",
       webPreferences: {
@@ -41,132 +40,16 @@ class MainWindow implements MainWindowManager {
     const metadata = getMetadata();
     metadata.windowState && this.pinWindow();
 
-    ipcMain.handle("pin-window-toggle", () => {
+    ipcMain.handle("pin-window", () => {
       this.pinWindow();
     });
 
-    // Listen for job start request from renderer process
-    ipcMain.handle(
-      "process-files",
-      async (event, commands: any[], metadata: any) => {
-        // Store listeners to clean them up later
-        const listeners = new Map();
-        const jobIds: string[] = [];
-        try {
-          // Process each command and collect job IDs
-          jobIds.push(
-            ...commands.map((command) =>
-              this.filePress.addCommandString(command.command, metadata)
-            )
-          );
-
-          // Define progress listener and store it for cleanup
-          const progressListener = (progress: any) => {
-            // Only forward progress for jobs that were created in this request
-            if (jobIds.includes(progress.jobId)) {
-              event.sender.send("compression-progress", progress);
-            }
-          };
-
-          // Define error listener and store it for cleanup
-          const errorListener = (error: any) => {
-            // Only forward errors for jobs that were created in this request
-            if (jobIds.includes(error.jobId)) {
-              console.error("File processing error:", error);
-              event.sender.send("compression-error", {
-                message: error.error?.message || error.error || "Unknown error",
-                jobId: error.jobId,
-              });
-            }
-          };
-
-          // Define completion listener and store it for cleanup
-          const completionListener = (completed: any) => {
-            // Only forward completion for jobs that were created in this request
-            if (jobIds.includes(completed.jobId)) {
-              event.sender.send("compression-complete", completed);
-            }
-          };
-
-          // Define all-completed listener for when all jobs finish
-          const allCompletedListener = (summary: any) => {
-            // Check if all our jobs are done before sending final summary
-            if (
-              jobIds.every((id) => {
-                const job = this.filePress.getJobById(id);
-                return !job || !this.filePress.isJobActive(id);
-              })
-            ) {
-              event.sender.send("all-compressions-complete", {
-                jobIds,
-                totalSizeSaved: summary.totalSizeSaved,
-              });
-              // Clean up listeners when all jobs are complete
-              cleanupListeners();
-            }
-          };
-
-          // Store listeners for cleanup
-          listeners.set("progress", progressListener);
-          listeners.set("error", errorListener);
-          listeners.set("completed", completionListener);
-          listeners.set("allCompleted", allCompletedListener);
-
-          // Attach listeners
-          this.filePress.on("progress", progressListener);
-          this.filePress.on("error", errorListener);
-          this.filePress.on("completed", completionListener);
-          this.filePress.on("allCompleted", allCompletedListener);
-
-          // Function to clean up listeners when done
-          const cleanupListeners = () => {
-            listeners.forEach((listener, event) => {
-              this.filePress.removeListener(event, listener);
-            });
-            listeners.clear();
-          };
-
-          // Clean up listeners if the window is closed
-          event.sender.on("destroyed", cleanupListeners);
-
-          console.log(
-            `Started processing ${jobIds.length} files with job IDs:`,
-            jobIds
-          );
-
-          return {
-            jobIds,
-            // queueStatus: this.filePress.getQueueStatus(),
-          };
-        } catch (error) {
-          console.error("Error starting file processing:", error);
-
-          // Clean up any listeners if there was an error
-          listeners.forEach((listener, event) => {
-            this.filePress.removeListener(event, listener);
-          });
-
-          throw error; // Rethrow to be handled by IPC
-        }
-      }
-    );
-
-    // Add a handler for cancelling jobs
-    // ipcMain.handle("cancel-compression", async (event, jobId) => {
-    //   const result = this.filePress.cancelJob(jobId);
-    //   return { success: result };
-    // });
-
-    // Add a handler for cancelling all jobs
-    // ipcMain.handle("cancel-all-compressions", async (event) => {
-    //   this.filePress.cancelAllJobs();
-    //   return { success: true };
-    // });
-
-    // Add a handler for getting queue status
-    // ipcMain.handle("get-compression-queue-status", async () => {
-    //   return this.filePress.getQueueStatus();
-    // });
+    ipcMain.handle("minimize-window", () => {
+      this.minimize();
+    });
+    ipcMain.handle("close-window", () => {
+      app.quit();
+    });
   }
 
   pinWindow() {
@@ -183,6 +66,10 @@ class MainWindow implements MainWindowManager {
       });
       this.window.setHiddenInMissionControl(true);
     }
+  }
+
+  minimize() {
+    this.window?.minimize();
   }
 
   open() {

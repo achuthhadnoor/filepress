@@ -22,7 +22,6 @@ function FilePress() {
     const [files, setFiles] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const [processingFile, setProcessingFile] = useState(null);
-    const [processProgress, setProcessProgress] = useState(0);
     const fileInputRef = useRef(null);
 
     const onFilesSelected = (filterFiles: File[]) => { };
@@ -151,7 +150,7 @@ function FilePress() {
     return (
         <div className="flex flex-col h-screen">
             <div className="drag flex px-2 py-1 justify-end shadow items-center gap-2">
-                <div className="flex-1 text-center">Filepress</div>
+                <div className="flex-1 text-center">Filepress <span className="text-xs">(Trail: 6 days left)</span></div>
                 <span className="p-2 rounded-md hover:bg-neutral-200 no-drag">
                     <Pin size={16} />
                 </span>
