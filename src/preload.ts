@@ -7,7 +7,15 @@ import { getFullPath } from "./utils";
 
 const electronAPI = {
   preferences: {},
-  app: {},
+  app: {
+    compressVideo: (files: File[], settings: any) =>
+      ipcRenderer.invoke("compress-video", { files, settings }),
+  },
+  windowActions: {
+    pinWindow: () => ipcRenderer.invoke("pin-window"),
+    minimizeWindow: () => ipcRenderer.invoke("minimize-window"),
+    closeWindow: () => ipcRenderer.invoke("close-window"),
+  },
   handleOpenUrl: (callback: any) => ipcRenderer.on("open-url", callback),
 };
 

@@ -26,7 +26,6 @@ class MainWindow implements MainWindowManager {
       fullscreenable: false,
       visualEffectState: "active",
       vibrancy: "sidebar",
-      alwaysOnTop: true,
       backgroundMaterial: "mica",
       titleBarStyle: "hiddenInset",
       webPreferences: {
@@ -34,15 +33,21 @@ class MainWindow implements MainWindowManager {
       },
     });
     this.window.loadURL(MAIN_WINDOW_WEBPACK_ENTRY);
-
+    this.window.webContents.openDevTools({ mode: "detach" });
     this.window.on("closed", () => {
       this.window = null;
     });
     const metadata = getMetadata();
     metadata.windowState && this.pinWindow();
 
-    ipcMain.handle("pin-window-toggle", () => {
+    ipcMain.handle("pin-window", () => {
       this.pinWindow();
+    });
+    ipcMain.handle("minimize-window", () => {
+      this.minimizeWindow();
+    });
+    ipcMain.handle("close-window", () => {
+      this.close();
     });
 
     // Listen for job start request from renderer process
@@ -168,20 +173,22 @@ class MainWindow implements MainWindowManager {
     //   return this.filePress.getQueueStatus();
     // });
   }
-
+  minimizeWindow() {
+    this.window?.minimize();
+  }
   pinWindow() {
     if (this.window?.isAlwaysOnTop()) {
       if (app.dock) app.dock.show();
-      this.window.setAlwaysOnTop(false);
-      this.window.setVisibleOnAllWorkspaces(false);
-      this.window.setHiddenInMissionControl(false);
+      this.window?.setAlwaysOnTop(false);
+      this.window?.setVisibleOnAllWorkspaces(false);
+      // this.window?.setHiddenInMissionControl(false);
     } else {
       if (app.dock) app.dock.hide();
-      this.window.setAlwaysOnTop(true, "floating");
-      this.window.setVisibleOnAllWorkspaces(true, {
+      this.window?.setAlwaysOnTop(true, "floating");
+      this.window?.setVisibleOnAllWorkspaces(true, {
         visibleOnFullScreen: true,
       });
-      this.window.setHiddenInMissionControl(true);
+      // this.window?.setHiddenInMissionControl(true);
     }
   }
 
