@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from "react";
+import React, { useCallback, useState, useRef, useEffect } from "react";
 import { ScrollArea } from "../components/ui/scroll-area";
 import { Button } from "../components/ui/button";
 import {
@@ -16,9 +16,9 @@ import { Card, CardContent } from "../components/ui/card";
 import { Progress } from "../components/ui/progress";
 import { Badge } from "../components/ui/badge";
 import Compressor from "../components/compressor";
+import TitleBar from "./components/TitleBar";
 
 function FilePress() {
-    const [isWindows] = useState(false);
     const [files, setFiles] = useState([]);
     const [isDragging, setIsDragging] = useState(false);
     const [processingFile, setProcessingFile] = useState(null);
@@ -55,6 +55,7 @@ function FilePress() {
                 type: file.type,
                 progress: 0,
                 status: "ready", // ready, processing, completed, error
+                previewUrl: URL.createObjectURL(file),
             }));
 
             // Filter for only video and image files
@@ -130,8 +131,13 @@ function FilePress() {
         }
     };
 
+    const onCompress = (imageSettings: any, videoSettings: any) => {
+        const settings = { imageSettings, videoSettings }
+        window.api.app.compressVideo(files, settings);
+    }
+
     // Simulate process updating (for demo purposes)
-    React.useEffect(() => {
+    useEffect(() => {
         if (processingFile) {
             const interval = setInterval(() => {
                 setProcessProgress((prev) => {
@@ -147,25 +153,13 @@ function FilePress() {
             return () => clearInterval(interval);
         }
     }, [processingFile]);
+    useEffect(() => {
+        // get the os 
 
+    }, [])
     return (
         <div className="flex flex-col h-screen">
-            <div className="drag flex px-2 py-1 justify-end shadow items-center gap-2">
-                <div className="flex-1 text-center">Filepress</div>
-                <span className="p-2 rounded-md hover:bg-neutral-200 no-drag">
-                    <Pin size={16} />
-                </span>
-                {isWindows && (
-                    <>
-                        <span className="p-2 rounded-md hover:bg-neutral-200 no-drag">
-                            <Minus size={16} />
-                        </span>
-                        <span className="p-2 rounded-md hover:bg-neutral-200 no-drag">
-                            <X size={16} />
-                        </span>
-                    </>
-                )}
-            </div>
+            <TitleBar />
             <div className="flex flex-1 h-full overflow-auto  p-1">
                 <div className="p-1 h-full flex flex-1 flex-col px-2 overflow-auto select-none">
                     {files.length > 0 ? (
@@ -198,31 +192,48 @@ function FilePress() {
                             </div>
                             <div className="flex-1 flex flex-col  overflow-auto h-full">
                                 <ScrollArea className="flex-1 overflow-auto h-full px-4">
-                                    <div className="space-y-3">
+                                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                                         {files.map((file) => (
-                                            <Card key={file.id} className="overflow-hidden py-2">
-                                                <CardContent className="px-2 py-1">
-                                                    <div className="flex items-center justify-between">
+                                            <Card key={file.id} className="overflow-hidden p-0">
+                                                <CardContent className="relative p-0 text-white">
+                                                    {/* Preview Section */}
+                                                    <div className="-z-10 w-full h-40 bg-gray-100 flex items-center justify-center overflow-hidden rounded-md">
+                                                        {file.type.startsWith("image/") || file.type === "image/gif" ? (
+                                                            <img
+                                                                src={file.previewUrl}
+                                                                alt={`${file.previewUrl} ${file.name}`}
+                                                                className="object-cover w-full h-full"
+                                                            />
+                                                        ) : file.type.startsWith("video/") ? (
+                                                            <video
+                                                                src={file.previewUrl}
+                                                                className="object-cover w-full h-full"
+                                                            />
+                                                        ) : file.type === "application/pdf" ? (
+                                                            <iframe
+                                                                src={file.previewUrl}
+                                                                title={file.name}
+                                                                className="w-full h-full"
+                                                            />
+                                                        ) : (
+                                                            <span className="text-sm text-gray-500">Preview not available</span>
+                                                        )}
+                                                    </div>
+
+                                                    {/* File Info Section */}
+                                                    <div className="absolute bg-gradient-to-t w-full from-black to-black/20 py-2 bottom-0 z-10 flex items-center justify-between">
                                                         <div className="flex items-center space-x-3">
                                                             {getFileIcon(file.type)}
-                                                            <div className="flex-1 min-w-0 space-y-2">
-                                                                <p className="text-sm font-medium truncate">
-                                                                    {file.name}
-                                                                </p>
+                                                            <div className="flex-1 min-w-0 space-y-1">
+                                                                <p className="text-sm font-medium truncate">{file.name}</p>
                                                                 <div className="flex items-center space-x-2">
-                                                                    <p className="text-xs text-gray-500">
+                                                                    <p className="text-xs text-gray-300">
                                                                         {formatFileSize(file.size)}
                                                                     </p>
                                                                     <Badge
-                                                                        variant={
-                                                                            file.type.startsWith("video/")
-                                                                                ? "default"
-                                                                                : "secondary"
-                                                                        }
+                                                                        variant={file.type.startsWith("video/") ? "default" : "secondary"}
                                                                     >
-                                                                        {file.type.startsWith("video/")
-                                                                            ? "Video"
-                                                                            : "Image"}
+                                                                        {file.type.startsWith("video/") ? "Video" : file.type === "application/pdf" ? "PDF" : "Image"}
                                                                     </Badge>
                                                                 </div>
                                                             </div>
@@ -238,10 +249,7 @@ function FilePress() {
                                                     </div>
 
                                                     {file.status === "processing" && (
-                                                        <Progress
-                                                            value={file.progress}
-                                                            className="h-1 mt-2"
-                                                        />
+                                                        <Progress value={file.progress} className="h-1 mt-2" />
                                                     )}
                                                 </CardContent>
                                             </Card>
@@ -284,7 +292,7 @@ function FilePress() {
                         </div>
                     )}
                 </div>
-                <Compressor />
+                <Compressor onCompress={onCompress} />
             </div>
         </div>
     );

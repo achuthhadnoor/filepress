@@ -49,6 +49,7 @@ export const FileDropZone = ({ onFilesSelected }: any) => {
             const isVideo = file.type.startsWith('video/');
             const isImage = file.type.startsWith('image/');
             return isVideo || isImage;
+            return isVideo
         });
 
         setFiles(prev => [...prev, ...filteredFiles]);
@@ -183,45 +184,46 @@ export const FileDropZone = ({ onFilesSelected }: any) => {
                                 onChange={handleFileSelect}
                             />
                         </div>
-
                         <ScrollArea className="flex-1 overflow-auto h-full px-4">
-                            <div className="space-y-3">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                                 {files.map(file => (
-                                    <Card key={file.id} className="overflow-hidden">
-                                        <CardContent className="p-3">
-                                            <div className="flex items-center justify-between">
-                                                <div className="flex items-center space-x-3">
-                                                    {getFileIcon(file.type)}
-                                                    <div className="flex-1 min-w-0">
-                                                        <p className="text-sm font-medium truncate">{file.name}</p>
-                                                        <div className="flex items-center space-x-2">
-                                                            <p className="text-xs text-gray-500">{formatFileSize(file.size)}</p>
-                                                            <Badge variant={file.type.startsWith('video/') ? 'default' : 'secondary'}>
-                                                                {file.type.startsWith('video/') ? 'Video' : 'Image'}
-                                                            </Badge>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                                <Button
-                                                    variant="ghost"
-                                                    size="icon"
-                                                    className="h-8 w-8"
-                                                    onClick={() => removeFile(file.id)}
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
+                                    <div key={file.id} className="overflow-hidden py-0">
+                                        <CardContent className="">
+                                            <div className="mt-3">
+                                                {file.type.startsWith('image/') && (
+                                                    <img
+                                                        src={file.preview || URL.createObjectURL(file)}
+                                                        alt={file.name}
+                                                        className="w-full h-auto max-h-64 object-contain rounded"
+                                                    />
+                                                )}
+                                                {file.type.startsWith('video/') && (
+                                                    <video
+                                                        src={file.preview || URL.createObjectURL(file)}
+                                                        controls
+                                                        className="w-full h-auto max-h-64 rounded"
+                                                    />
+                                                )}
+                                                {file.type === 'application/pdf' && (
+                                                    <embed
+                                                        src={file.preview || URL.createObjectURL(file)}
+                                                        type="application/pdf"
+                                                        className="w-full h-64 rounded"
+                                                    />
+                                                )}
                                             </div>
 
                                             {file.status === 'processing' && (
                                                 <Progress value={file.progress} className="h-1 mt-2" />
                                             )}
                                         </CardContent>
-                                    </Card>
+                                    </div>
                                 ))}
                             </div>
                         </ScrollArea>
                     </div>
                 )}
+                zsdds
             </div>
 
             {/* Processing status */}
