@@ -6,13 +6,11 @@ import { Switch } from '../components/ui/switch';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
 import { Label } from '../components/ui/label';
-import { Separator } from '../components/ui/separator';
 import { ScrollArea } from '../components/ui/scroll-area';
 import { Card, CardContent } from '../components/ui/card';
-import { ChevronLeft, ChevronRight, Save, Settings } from 'lucide-react';
+import { Save } from 'lucide-react';
 
 export const CompressionSidebar = ({ onCompress }: any) => {
-    const [collapsed, setCollapsed] = useState(false);
     const [videoSettings, setVideoSettings] = useState({
         codec: 'libx264',
         crf: 23,

@@ -21,7 +21,6 @@ class MainWindow implements MainWindowManager {
       height: 700,
       width: 1024,
       frame: false,
-      // transparent: true,
       resizable: false,
       fullscreenable: false,
       visualEffectState: "active",
